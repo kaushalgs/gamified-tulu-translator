@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAMIFIED TULU TRANSLATION</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #222;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+  }
+  .container {
+    text-align: center;
+    padding: 20px;
+  }
+  input[type="text"] {
+    padding: 8px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+  }
+  button {
+    padding: 10px 20px;
+    background-color: #f44336;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background-color: #f5f5f5;
+  }
+  h1 {
+    margin-bottom: 110px; /* Updated margin-bottom */
+    background: linear-gradient(to right, #2196F3, #9C27B0, #FF4081); /* Added gradient */
+    -webkit-background-clip: text; /* Added for text gradient */
+    -webkit-text-fill-color: transparent; /* Added for text gradient */
+    font-size: 96px; /* Tripled the size */
+  }
+  #levelInfo { 
+    font-size: 28px;
+    margin-top: 20px;
+  }
+  #progressBar {
+    width: 15%;
+    height: 12px;
+    background-color: #333;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 16px auto;
+  }
+  #progress {
+    width: 0%;
+    height: 100%;
+    background-color: #4caf50;
+  }
+  #timeRemaining {
+    float: left;
+    margin-left: 20px;
+    line-height: 50px;
+    font-size: 25px; 
+}
+
+#points {
+    float: right;
+    margin-right: 20px;
+    line-height: 50px;
+    font-size: 25px;
+}
+  #progressBarContainer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #questionInfo {
+    font-size: 20px;
+    margin-top: 10px;
+  }
+  #question {
+    font-size: 50px;
+    margin-top: 20px;
+  }
+  #options {
+    margin-top: 20px;
+  }
+  button.option {
+    margin: 5px;
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 20px;
+  }
+  button.option:hover {
+    background-color: #555;
+  }
+  #leaderboard {
+    margin-top: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #444;
+  }
+  th {
+    background-color: #444;
+  }
+  /* Button styling */
+  #startBtn, #pauseBtn, button[type="reset"] {
+    background-color: #333333; /* Changed color */
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>GAMIFIED TULU TRANSLATION</h1>
+  <label for="playerName">Enter Your Name:</label>
+  <input type="text" id="playerName">
+  <button id="startBtn" onclick="startGame()">Start Game</button>
+  <button id="pauseBtn" onclick="pauseGame()">Pause Game</button>
+  <div id="levelInfo"></div>
+  <div id="progressBarContainer">
+    <div id="timeRemaining">Time Remaining: 60s</div>
+    <div id="points">Points: 0</div>
+  </div>
+  <div id="progressBar">
+    <div id="progress"></div>
+  </div>
+  <div id="questionInfo"></div>
+  <div id="question"></div>
+  <p style="font-size: 14px; margin-top: 20px; clear:both;">Choose The Correct Option</p>
+  <div id="options"></div>
+  <div id="leaderboard"></div>
+  <button onclick="resetLeaderboard()">Reset Leaderboard</button>
+</div>
+
+<script>
+  const levels = [
+    // Level 1 - Basic Words
+    [
+      { tulu: "namaste", translation: "hello", options: ["bye", "ok", "here", "hello"] },
+      { tulu: "barpe", translation: "bye", options: ["here", "bye", "tell", "give"] },
+      { tulu: "ijji", translation: "no", options: ["no", "hello", "here", "ok"] },
+      { tulu: "aawu", translation: "ok", options: ["tell", "ok", "bye", "here"] },
+      { tulu: "moolu", translation: "here", options: ["tell", "here", "no", "bye"] }
+    ],
+    // Level 2 - Words Used in Daily Life
+    [
+      { tulu: "Yencha ullar ?", translation: "How are you", options: ["What is this", "How are you", "Where are you", "Why are you"] },
+      { tulu: "daada malthondullar?", translation: "what are you doing", options: ["what are you doing", "who are you", "where are you", "why are you"] },
+      { tulu: "Vanas aande?", translation: "had lunch", options: ["had lunch", "have breakfast", "have dinner", "have tea"] },
+      { tulu: "poyi", translation: "lets go", options: ["come here", "go there", "lets go", "stay here"] },
+      { tulu: "olu ullar?", translation: "where are you", options: ["what are you doing", "where are you", "how are you", "who are you"] }
+    ],
+    // Level 3 - Fruits and Vegetables
+    [
+      { tulu: "kukku", translation: "mango", options: ["banana", "apple", "mango", "grapes"] },
+      { tulu: "dhrakshi", translation: "grapes", options: ["banana", "grapes", "mango", "apple"] },
+      { tulu: "Batani", translation: "peas", options: ["peas", "carrot", "cabbage", "potato"] },
+      { tulu: "Limbe", translation: "lime", options: ["lemon", "lime", "orange", "apple"] },
+      { tulu: "Neerulli", translation: "onion", options: ["garlic", "onion", "potato", "ginger"] }
+    ],
+    // Level 4 - Numbers
+    [
+      { tulu: "onji", translation: "one", options: ["two", "one", "three", "four"] },
+      { tulu: "radd", translation: "two", options: ["one", "two", "three", "four"] },
+      { tulu: "muji", translation: "three", options: ["one", "two", "three", "four"] },
+      { tulu: "nalu", translation: "four", options: ["one", "two", "three", "four"] },
+      { tulu: "aaji", translation: "six", options: ["five", "six", "seven", "eight"] }
+    ]
+  ];
+
+  let currentLevel = 0;
+  let currentQuestion = 0;
+  let points = 0;
+  let playerName = "";
+  let timer;
+  const timeLimit = 60;
+
+  function startGame() {
+    playerName = document.getElementById('playerName').value;
+    document.getElementById('startBtn').style.display = 'none';
+    showQuestion();
+    startTimer();
+  }
+
+  function showQuestion() {
+    const level = levels[currentLevel];
+    if (currentQuestion >= level.length) {
+      endLevel();
+      return;
+    }
+    const question = level[currentQuestion];
+    document.getElementById('levelInfo').textContent = `Level ${currentLevel + 1} - ${getLevelName(currentLevel)}`;
+    document.getElementById('questionInfo').textContent = `Question ${currentQuestion + 1}/${level.length}`;
+    document.getElementById('question').textContent = question.tulu;
+    document.getElementById('options').innerHTML = "";
+    question.options.forEach((option, index) => {
+      const optionBtn = document.createElement('button');
+      optionBtn.textContent = option;
+      optionBtn.className = "option";
+      optionBtn.onclick = () => selectOption(index);
+      document.getElementById('options').appendChild(optionBtn);
+    });
+  }
+
+  function getLevelName(levelIndex) {
+    switch (levelIndex) {
+      case 0:
+        return "Basic Words";
+      case 1:
+        return "Words Used in Daily Life";
+      case 2:
+        return "Fruits and Vegetables";
+      case 3:
+        return "Numbers";
+      default:
+        return "";
+    }
+  }
+
+  function selectOption(selectedIndex) {
+    const level = levels[currentLevel];
+    const question = level[currentQuestion];
+    if (question.translation.toLowerCase() === question.options[selectedIndex].toLowerCase()) {
+      points += calculatePoints();
+    }
+    currentQuestion++;
+    if (currentQuestion >= level.length) {
+      endLevel();
+    } else {
+      showQuestion();
+    }
+  }
+
+  function startTimer() {
+    let timeLeft = timeLimit;
+    timer = setInterval(() => {
+      timeLeft--;
+      document.getElementById('progress').style.width = `${(timeLeft / timeLimit) * 100}%`;
+      document.getElementById('timeRemaining').textContent = `Time Remaining: ${timeLeft}s`;
+      if (timeLeft === 0) {
+        clearInterval(timer);
+        alert("OUT");
+        endLevel();
+      }
+    }, 1000);
+  }
+
+  function endLevel() {
+    clearInterval(timer);
+    currentLevel++;
+    currentQuestion = 0;
+    if (currentLevel < levels.length) {
+      alert("Congratulations! You completed level " + (currentLevel));
+      if (points < 50) {
+        alert("You didn't score enough points to proceed to the next level. Game Over!");
+        endGame();
+      } else {
+        showQuestion();
+        startTimer();
+      }
+    } else {
+      if (points >= 25) {
+        alert("Congratulations! You completed all levels and won the game!");
+      } else {
+        alert("You didn't score enough points to win the game. Game Over!");
+      }
+      endGame();
+    }
+    updatePoints();
+  }
+
+  function calculatePoints() {
+    const timeLeft = document.getElementById('progress').style.width === '0%' ? 0 : 1;
+    if (timeLeft === 0) {
+      return 0;
+    } else if (timeLeft >= 40) {
+      return 100;
+    } else if (timeLeft >= 20) {
+      return 50;
+    } else {
+      return 25;
+    }
+  }
+
+  function endGame() {
+    updateLeaderboard(playerName, points);
+    displayLeaderboard();
+    resetGame();
+  }
+
+  function resetGame() {
+    currentLevel = 0;
+    currentQuestion = 0;
+    points = 0;
+    document.getElementById('startBtn').style.display = 'inline-block';
+    document.getElementById('progress').style.width = '0%';
+    updatePoints();
+  }
+
+  function updatePoints() {
+    document.getElementById('points').textContent = `Points: ${points}`;
+  }
+
+  function updateLeaderboard(playerName, points) {
+    let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    leaderboard.push({ playerName, points });
+    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+  }
+
+  function resetLeaderboard() {
+    localStorage.removeItem('leaderboard');
+    displayLeaderboard();
+  }
+
+  function displayLeaderboard() {
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    leaderboard.sort((a, b) => b.points - a.points); // Sort leaderboard by points descending
+    let leaderboardHTML = "<h2>Leaderboard</h2>";
+    leaderboardHTML += "<table>";
+    leaderboardHTML += "<tr><th>Player Name</th><th>Points</th></tr>";
+    leaderboard.forEach((entry, index) => {
+      leaderboardHTML += `<tr><td>${entry.playerName}</td><td>${entry.points}</td></tr>`;
+    });
+    leaderboardHTML += "</table>";
+    document.getElementById('leaderboard').innerHTML = leaderboardHTML;
+  }
+  
+  function pauseGame() {
+    alert("Game Paused");
+    // You can add code to pause the game here
+  }
+</script>
+</body>
+</html>
